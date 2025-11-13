@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 1 - Attendance Table</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Exercise 1 - Attendance Table</h1>
+<a href="exercise2.html">Next: Add Student (Exercise 2)</a>
+
+<table id="attendanceTable">
+    <thead>
+        <tr>
+            <th>Last Name</th><th>First Name</th>
+            <th>S1</th><th>P1</th>
+            <th>S2</th><th>P2</th>
+            <th>S3</th><th>P3</th>
+            <th>S4</th><th>P4</th>
+            <th>S5</th><th>P5</th>
+            <th>S6</th><th>P6</th>
+            <th>Absences</th>
+            <th>Participation</th>
+            <th>Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Ahmed</td><td>Sara</td>
+            <td>✓</td><td>✓</td>
+            <td></td><td></td>
+            <td></td><td></td>
+            <td></td><td></td>
+            <td></td><td></td>
+            <td></td><td></td>
+            <td>5</td><td>1</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Yacine</td><td>Ali</td>
+            <td>✓</td><td>✓</td>
+            <td>✓</td><td>✓</td>
+            <td>✓</td><td>✓</td>
+            <td>✓</td><td>✓</td>
+            <td>✓</td><td>✓</td>
+            <td>1</td><td>4</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Houcine</td><td>Rania</td>
+            <td>✓</td><td>✓</td>
+            <td>✓</td><td>✓</td>
+            <td></td><td></td>
+            <td></td><td></td>
+            <td></td><td></td>
+            <td>4</td><td>2</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+function updateAttendance() {
+    const table = document.getElementById('attendanceTable').tBodies[0];
+    for (let row of table.rows) {
+        let absences = parseInt(row.cells[14].textContent) || 0;
+        let participation = parseInt(row.cells[15].textContent) || 0;
+
+        row.classList.remove('green','yellow','red');
+        if(absences < 3) row.classList.add('green');
+        else if(absences <= 4) row.classList.add('yellow');
+        else row.classList.add('red');
+
+        if(absences < 3 && participation >= 3) row.cells[16].textContent = "Good attendance – Excellent participation";
+        else if(absences >=3 && absences <=4) row.cells[16].textContent = "Warning – attendance low – You need to participate more";
+        else row.cells[16].textContent = "Excluded – too many absences – You need to participate more";
+    }
+}
+updateAttendance();
+</script>
+
+</body>
+</html>

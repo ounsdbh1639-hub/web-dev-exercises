@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 3 - Add Student to Table</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Exercise 3 - Add Student to Attendance Table</h1>
+<a href="exercise2.html">Back: Form Validation (Exercise 2)</a>
+<a href="exercise4.html">Next: Report (Exercise 4)</a>
+
+<table id="attendanceTable">
+    <thead>
+        <tr>
+            <th>Last Name</th><th>First Name</th>
+            <th>S1</th><th>P1</th>
+            <th>S2</th><th>P2</th>
+            <th>S3</th><th>P3</th>
+            <th>S4</th><th>P4</th>
+            <th>S5</th><th>P5</th>
+            <th>S6</th><th>P6</th>
+            <th>Absences</th>
+            <th>Participation</th>
+            <th>Message</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<h3>Add Student</h3>
+<form id="addStudentForm">
+    <label>First Name: <input type="text" id="firstName"></label>
+    <label>Last Name: <input type="text" id="lastName"></label>
+    <button type="submit">Add Student</button>
+</form>
+<p id="confirmation" style="color:green;"></p>
+
+<script>
+function updateAttendance() {
+    const table = document.getElementById('attendanceTable').tBodies[0];
+    for (let row of table.rows) {
+        row.classList.remove('green','yellow','red');
+        let abs = parseInt(row.cells[14]?.textContent) || 0;
+        let par = parseInt(row.cells[15]?.textContent) || 0;
+        if(abs < 3) row.classList.add('green');
+        else if(abs <=4) row.classList.add('yellow');
+        else row.classList.add('red');
+        row.cells[16].textContent = abs<3?"Good attendance":"Needs improvement";
+    }
+}
+
+const form = document.getElementById('addStudentForm');
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const fName = document.getElementById('firstName').value.trim();
+    const lName = document.getElementById('lastName').value.trim();
+    if(!fName || !lName) return;
+    const table = document.getElementById('attendanceTable').tBodies[0];
+    const row = table.insertRow();
+    row.innerHTML = `<td>${lName}</td><td>${fName}</td>${'<td></td>'.repeat(14)}<td>0</td><td>0</td><td></td>`;
+    updateAttendance();
+    document.getElementById('confirmation').textContent = "Student added successfully!";
+    form.reset();
+});
+</script>
+
+</body>
+</html>

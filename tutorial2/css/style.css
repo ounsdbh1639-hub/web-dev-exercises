@@ -1,0 +1,12 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+th { background-color: #f0f0f0; }
+.green { background-color: #d4edda; }
+.yellow { background-color: #fff3cd; }
+.red { background-color: #f8d7da; }
+.error { color: red; font-size: 0.9em; }
+#report { margin-top: 20px; }
+canvas { max-width: 600px; margin-top: 10px; }
+button { margin-top: 10px; padding: 5px 10px; }
+a { text-decoration: none; margin-right: 10px; }

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 2 - Add Student</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Exercise 2 - Add Student Form</h1>
+<a href="exercise1.html">Back: Attendance Table (Exercise 1)</a>
+<a href="exercise3.html">Next: Add Student to Table (Exercise 3)</a>
+
+<form id="addStudentForm">
+    <label>Student ID: <input type="text" id="studentID"></label> <span class="error" id="idError"></span><br>
+    <label>First Name: <input type="text" id="firstName"></label> <span class="error" id="firstNameError"></span><br>
+    <label>Last Name: <input type="text" id="lastName"></label> <span class="error" id="lastNameError"></span><br>
+    <label>Email: <input type="text" id="email"></label> <span class="error" id="emailError"></span><br>
+    <button type="submit">Add Student</button>
+</form>
+<p id="confirmation" style="color:green;"></p>
+
+<script>
+const form = document.getElementById('addStudentForm');
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const studentID = document.getElementById('studentID').value.trim();
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    let valid = true;
+    document.getElementById('idError').textContent = '';
+    document.getElementById('firstNameError').textContent = '';
+    document.getElementById('lastNameError').textContent = '';
+    document.getElementById('emailError').textContent = '';
+
+    if(studentID === '' || !/^\d+$/.test(studentID)){
+        document.getElementById('idError').textContent = "ID must be numbers only";
+        valid = false;
+    }
+    if(firstName === '' || !/^[A-Za-z]+$/.test(firstName)){
+        document.getElementById('firstNameError').textContent = "First name letters only";
+        valid = false;
+    }
+    if(lastName === '' || !/^[A-Za-z]+$/.test(lastName)){
+        document.getElementById('lastNameError').textContent = "Last name letters only";
+        valid = false;
+    }
+    if(email === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        document.getElementById('emailError').textContent = "Invalid email format";
+        valid = false;
+    }
+    if(!valid) return;
+
+    document.getElementById('confirmation').textContent = "Validation successful!";
+    form.reset();
+});
+</script>
+
+</body>
+</html>
