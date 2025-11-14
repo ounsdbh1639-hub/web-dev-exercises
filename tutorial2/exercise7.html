@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Exercise 7 - Search & Sort</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/shared.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Exercise 7 — Search & Sort</h1>
+      <div class="topnav"><a href="exercise6.html">Exercise 6</a> <a href="exercise1.html">Table</a></div>
+    </div>
+
+    <div class="controls">
+      <input id="searchBox" placeholder="Search by Name (partial)..." style="padding:8px;border-radius:8px;border:1px solid #d5dee9;width:300px">
+      <button class="btn" id="sortAbs">Sort by Absences (Ascending)</button>
+      <button class="btn" id="sortPar">Sort by Participation (Descending)</button>
+      <div class="info small" id="sortMode">Currently unsorted</div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="searchTable">
+        <thead><tr><th>Last</th><th>First</th><th>Absences</th><th>Participation</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+
+<script>
+function draw(){
+  const list = Attendance.read().map((s,idx)=>{
+    return { idx, last: s.last, first: s.first, abs: Attendance.countAbsences(s), par: Attendance.countParticipation(s) };
+  });
+  const tbody = $('#searchTable tbody').empty();
+  list.forEach(item => {
+    tbody.append(`<tr data-idx="${item.idx}"><td>${item.last}</td><td>${item.first}</td><td>${item.abs}</td><td>${item.par}</td></tr>`);
+  });
+}
+
+draw();
+
+$('#searchBox').on('input', function(){
+  const q = $(this).val().toLowerCase().trim();
+  $('#searchTable tbody tr').each(function(){
+    const last = $(this).find('td').eq(0).text().toLowerCase();
+    const first = $(this).find('td').eq(1).text().toLowerCase();
+    const match = last.includes(q) || first.includes(q) || q === '';
+    $(this).toggle(match);
+  });
+});
+
+$('#sortAbs').on('click', function(){
+  const $rows = $('#searchTable tbody tr').get();
+  $rows.sort((a,b)=>{
+    const aVal = parseInt($(a).find('td').eq(2).text(),10);
+    const bVal = parseInt($(b).find('td').eq(2).text(),10);
+    return aVal - bVal;
+  });
+  $('#searchTable tbody').append($rows);
+  $('#sortMode').text('Currently sorted by absences (ascending)');
+});
+
+$('#sortPar').on('click', function(){
+  const $rows = $('#searchTable tbody tr').get();
+  $rows.sort((a,b)=>{
+    const aVal = parseInt($(a).find('td').eq(3).text(),10);
+    const bVal = parseInt($(b).find('td').eq(3).text(),10);
+    return bVal - aVal;
+  });
+  $('#searchTable tbody').append($rows);
+  $('#sortMode').text('Currently sorted by participation (descending)');
+});
+</script>
+</body>
+</html>

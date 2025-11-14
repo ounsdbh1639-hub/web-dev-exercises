@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Exercise 6 - Highlight Excellent Students</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/shared.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Exercise 6 — Highlight Excellent Students</h1>
+      <div class="topnav"><a href="exercise5.html">Exercise 5</a> <a href="exercise7.html">Exercise 7</a></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="highlightBtn">Highlight Excellent Students</button>
+      <button class="btn secondary" id="resetColors">Reset Colors</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="animTable">
+        <thead><tr><th>Last</th><th>First</th><th>Absences</th><th>Participation</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+function drawAnim(){
+  const tbody = $('#animTable tbody').empty();
+  Attendance.read().forEach((s,idx)=>{
+    const abs = Attendance.countAbsences(s);
+    const par = Attendance.countParticipation(s);
+    const $tr = $(`<tr data-idx="${idx}"><td>${s.last}</td><td>${s.first}</td><td>${abs}</td><td>${par}</td></tr>`);
+    tbody.append($tr);
+  });
+}
+
+$('#highlightBtn').on('click', function(){
+  $('#animTable tbody tr').each(function(){
+    const idx = $(this).data('idx');
+    const s = Attendance.read()[idx];
+    const abs = Attendance.countAbsences(s);
+    if(abs < 3){
+      // animate: pulse via fade
+      $(this).fadeTo(400,0.4).fadeTo(400,1.0).fadeTo(400,0.6).fadeTo(400,1.0);
+      $(this).css('background','#e8fff0');
+    }
+  });
+});
+
+$('#resetColors').on('click', function(){
+  $('#animTable tbody tr').css('background','').stop(true,true).show();
+});
+
+drawAnim();
+</script>
+</body>
+</html>

@@ -1,64 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exercise 4 - Attendance Report</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <title>Exercise 4 - Report</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/shared.js"></script>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Exercise 4 — Show Report</h1>
+      <div class="topnav"><a href="exercise3.html">Exercise 3</a> <a href="exercise1.html">Table</a></div>
+    </div>
 
-<h1>Exercise 4 - Attendance Report</h1>
-<a href="exercise3.html">Back: Add Student (Exercise 3)</a>
+    <div class="controls">
+      <button class="btn" id="reportBtn">Show Report</button>
+      <div class="info small">Click to compute totals and see chart</div>
+    </div>
 
-<table id="attendanceTable">
-    <thead>
-        <tr><th>Last Name</th><th>First Name</th><th>Absences</th><th>Participation</th></tr>
-    </thead>
-    <tbody>
-        <tr><td>Ahmed</td><td>Sara</td><td>5</td><td>1</td></tr>
-        <tr><td>Yacine</td><td>Ali</td><td>1</td><td>4</td></tr>
-        <tr><td>Houcine</td><td>Rania</td><td>4</td><td>2</td></tr>
-    </tbody>
-</table>
+    <div class="chart-card hidden" id="reportCard">
+      <p class="status">Total Students: <span id="total"></span> — Present: <span id="present"></span> — Participated: <span id="participated"></span></p>
+      <canvas id="chart" width="600" height="260"></canvas>
+    </div>
+  </div>
 
-<button id="showReportBtn">Show Report</button>
-<div id="report">
-    <p>Total Students: <span id="totalStudents"></span></p>
-    <p>Students Present: <span id="studentsPresent"></span></p>
-    <p>Students Participated: <span id="studentsParticipated"></span></p>
-    <canvas id="reportChart"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.getElementById('showReportBtn').addEventListener('click', function(){
-    const table = document.getElementById('attendanceTable').tBodies[0];
-    const total = table.rows.length;
-    let present = 0, participated = 0;
-    for(let row of table.rows){
-        if(parseInt(row.cells[2].textContent) === 0) present++;
-        if(parseInt(row.cells[3].textContent) > 0) participated++;
-    }
-    document.getElementById('totalStudents').textContent = total;
-    document.getElementById('studentsPresent').textContent = present;
-    document.getElementById('studentsParticipated').textContent = participated;
+const ctx = document.getElementById('chart').getContext('2d');
+let chartInstance = null;
 
-    const ctx = document.getElementById('reportChart').getContext('2d');
-    new Chart(ctx,{
-        type:'bar',
-        data:{
-            labels:['Total Students','Present','Participated'],
-            datasets:[{
-                label:'Attendance Report',
-                data:[total,present,participated],
-                backgroundColor:['#007bff','#28a745','#ffc107']
-            }]
-        },
-        options:{responsive:true,scales:{y:{beginAtZero:true,precision:0}}}
-    });
+$('#reportBtn').on('click', function(){
+  const students = Attendance.read();
+  const total = students.length;
+  const present = students.filter(s => s.sessions.every(v => v===true)).length;
+  const participated = students.filter(s => s.parts.some(v => v===true)).length;
+
+  $('#total').text(total);
+  $('#present').text(present);
+  $('#participated').text(participated);
+  $('#reportCard').removeClass('hidden');
+
+  const data = [total, present, participated];
+
+  if(chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['Total','All Present','Participated'],
+      datasets:[{
+        label:'Attendance Report',
+        data:data,
+        backgroundColor: ['#3578ff','#2cc36b','#ffb020']
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
 });
 </script>
-
 </body>
 </html>

@@ -1,19 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exercise 1 - Attendance Table</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <title>Exercise 1 - Attendance</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/shared.js"></script>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Exercise 1 — Attendance Table (Interactive)</h1>
+      <div class="topnav">
+        <a href="exercise2.html">Exercise 2</a>
+        <a href="exercise3.html">Exercise 3</a>
+        <a href="exercise4.html">Exercise 4</a>
+        <a href="exercise5.html">Exercise 5</a>
+        <a href="exercise6.html">Exercise 6</a>
+        <a href="exercise7.html">Exercise 7</a>
+      </div>
+    </div>
 
-<h1>Exercise 1 - Attendance Table</h1>
-<a href="exercise2.html">Next: Add Student (Exercise 2)</a>
+    <div class="controls">
+      <button class="btn" id="resetBtn">Reset to default</button>
+      <div class="info">Tip: check/uncheck session boxes to mark present / absent</div>
+    </div>
 
-<table id="attendanceTable">
-    <thead>
-        <tr>
+    <div class="table-wrap">
+      <table id="attTable">
+        <thead>
+          <tr>
             <th>Last Name</th><th>First Name</th>
             <th>S1</th><th>P1</th>
             <th>S2</th><th>P2</th>
@@ -21,65 +37,26 @@
             <th>S4</th><th>P4</th>
             <th>S5</th><th>P5</th>
             <th>S6</th><th>P6</th>
-            <th>Absences</th>
-            <th>Participation</th>
-            <th>Message</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Ahmed</td><td>Sara</td>
-            <td>✓</td><td>✓</td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td>5</td><td>1</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Yacine</td><td>Ali</td>
-            <td>✓</td><td>✓</td>
-            <td>✓</td><td>✓</td>
-            <td>✓</td><td>✓</td>
-            <td>✓</td><td>✓</td>
-            <td>✓</td><td>✓</td>
-            <td>1</td><td>4</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Houcine</td><td>Rania</td>
-            <td>✓</td><td>✓</td>
-            <td>✓</td><td>✓</td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td></td><td></td>
-            <td>4</td><td>2</td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+            <th>Absences</th><th>Participation</th><th>Message</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <p class="info-note">Rows are colored by attendance: green = good, yellow = warning, red = excluded.</p>
+  </div>
 
 <script>
-function updateAttendance() {
-    const table = document.getElementById('attendanceTable').tBodies[0];
-    for (let row of table.rows) {
-        let absences = parseInt(row.cells[14].textContent) || 0;
-        let participation = parseInt(row.cells[15].textContent) || 0;
+const table = document.getElementById('attTable');
+Attendance.renderTable(table, { onChange: ()=>{} });
 
-        row.classList.remove('green','yellow','red');
-        if(absences < 3) row.classList.add('green');
-        else if(absences <= 4) row.classList.add('yellow');
-        else row.classList.add('red');
-
-        if(absences < 3 && participation >= 3) row.cells[16].textContent = "Good attendance – Excellent participation";
-        else if(absences >=3 && absences <=4) row.cells[16].textContent = "Warning – attendance low – You need to participate more";
-        else row.cells[16].textContent = "Excluded – too many absences – You need to participate more";
-    }
-}
-updateAttendance();
+document.getElementById('resetBtn').addEventListener('click', ()=> {
+  if(confirm("Reset table to default sample data?")) {
+    Attendance.removeAll();
+    location.reload();
+  }
+});
 </script>
-
 </body>
 </html>

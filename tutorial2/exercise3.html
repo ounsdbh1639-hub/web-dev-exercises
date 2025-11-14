@@ -1,71 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exercise 3 - Add Student to Table</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <title>Exercise 3 - Add Student to Table</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/shared.js"></script>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Exercise 3 — Add Student to Shared Table</h1>
+      <div class="topnav"><a href="exercise2.html">Exercise 2</a> <a href="exercise4.html">Exercise 4</a></div>
+    </div>
 
-<h1>Exercise 3 - Add Student to Attendance Table</h1>
-<a href="exercise2.html">Back: Form Validation (Exercise 2)</a>
-<a href="exercise4.html">Next: Report (Exercise 4)</a>
+    <form id="addForm">
+      <div class="form-row">
+        <input id="sid" placeholder="Student ID">
+        <input id="first" placeholder="First Name">
+        <input id="last" placeholder="Last Name">
+        <button class="btn" type="submit">Add to Table</button>
+      </div>
+    </form>
+    <p id="confirmation" class="small"></p>
 
-<table id="attendanceTable">
-    <thead>
-        <tr>
-            <th>Last Name</th><th>First Name</th>
-            <th>S1</th><th>P1</th>
-            <th>S2</th><th>P2</th>
-            <th>S3</th><th>P3</th>
-            <th>S4</th><th>P4</th>
-            <th>S5</th><th>P5</th>
-            <th>S6</th><th>P6</th>
-            <th>Absences</th>
-            <th>Participation</th>
-            <th>Message</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+    <div class="table-wrap" style="margin-top:12px">
+      <table id="miniTable">
+        <thead><tr><th>Last</th><th>First</th><th>Abs</th><th>Par</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-<h3>Add Student</h3>
-<form id="addStudentForm">
-    <label>First Name: <input type="text" id="firstName"></label>
-    <label>Last Name: <input type="text" id="lastName"></label>
-    <button type="submit">Add Student</button>
-</form>
-<p id="confirmation" style="color:green;"></p>
+  </div>
 
 <script>
-function updateAttendance() {
-    const table = document.getElementById('attendanceTable').tBodies[0];
-    for (let row of table.rows) {
-        row.classList.remove('green','yellow','red');
-        let abs = parseInt(row.cells[14]?.textContent) || 0;
-        let par = parseInt(row.cells[15]?.textContent) || 0;
-        if(abs < 3) row.classList.add('green');
-        else if(abs <=4) row.classList.add('yellow');
-        else row.classList.add('red');
-        row.cells[16].textContent = abs<3?"Good attendance":"Needs improvement";
-    }
+function refreshMini(){
+  const table = document.getElementById('miniTable');
+  const tbody = table.tBodies[0];
+  const students = Attendance.read();
+  tbody.innerHTML = '';
+  students.forEach(s=>{
+    const r = tbody.insertRow();
+    r.insertCell().textContent = s.last;
+    r.insertCell().textContent = s.first;
+    r.insertCell().textContent = Attendance.countAbsences ? Attendance.countAbsences(s) : s.sessions.filter(v=>!v).length;
+    r.insertCell().textContent = Attendance.countParticipation ? Attendance.countParticipation(s) : s.parts.filter(v=>v).length;
+  });
 }
 
-const form = document.getElementById('addStudentForm');
-form.addEventListener('submit', function(e){
-    e.preventDefault();
-    const fName = document.getElementById('firstName').value.trim();
-    const lName = document.getElementById('lastName').value.trim();
-    if(!fName || !lName) return;
-    const table = document.getElementById('attendanceTable').tBodies[0];
-    const row = table.insertRow();
-    row.innerHTML = `<td>${lName}</td><td>${fName}</td>${'<td></td>'.repeat(14)}<td>0</td><td>0</td><td></td>`;
-    updateAttendance();
-    document.getElementById('confirmation').textContent = "Student added successfully!";
-    form.reset();
+document.getElementById('addForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const sid = document.getElementById('sid').value.trim();
+  const first = document.getElementById('first').value.trim();
+  const last = document.getElementById('last').value.trim();
+  if(!sid || !first || !last){ document.getElementById('confirmation').textContent = "Please fill all fields"; return; }
+  // create new student with empty sessions/parts
+  const obj = { id: sid, last, first, sessions:[false,false,false,false,false,false], parts:[false,false,false,false,false,false] };
+  Attendance.addStudent(obj);
+  document.getElementById('confirmation').textContent = "Student added successfully!";
+  this.reset();
+  refreshMini();
+  // also refresh main table if it's open in another tab would require reload, but when user navigates it will read localStorage
 });
-</script>
 
+refreshMini();
+</script>
 </body>
 </html>
+

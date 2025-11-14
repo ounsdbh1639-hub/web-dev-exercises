@@ -1,63 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exercise 2 - Add Student</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <title>Exercise 2 - Add Student (Validation)</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/shared.js"></script>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Exercise 2 — Add Student (Validation)</h1>
+      <div class="topnav"><a href="exercise1.html">Back to Table</a> <a href="exercise3.html">Exercise 3</a></div>
+    </div>
 
-<h1>Exercise 2 - Add Student Form</h1>
-<a href="exercise1.html">Back: Attendance Table (Exercise 1)</a>
-<a href="exercise3.html">Next: Add Student to Table (Exercise 3)</a>
+    <form id="studentForm">
+      <div class="form-row">
+        <input id="sid" placeholder="Student ID (numbers only)"><span class="error" id="err-id"></span>
+        <input id="first" placeholder="First Name"><span class="error" id="err-first"></span>
+        <input id="last" placeholder="Last Name"><span class="error" id="err-last"></span>
+        <input id="email" placeholder="Email"><span class="error" id="err-email"></span>
+        <button class="btn" type="submit">Validate</button>
+      </div>
+    </form>
 
-<form id="addStudentForm">
-    <label>Student ID: <input type="text" id="studentID"></label> <span class="error" id="idError"></span><br>
-    <label>First Name: <input type="text" id="firstName"></label> <span class="error" id="firstNameError"></span><br>
-    <label>Last Name: <input type="text" id="lastName"></label> <span class="error" id="lastNameError"></span><br>
-    <label>Email: <input type="text" id="email"></label> <span class="error" id="emailError"></span><br>
-    <button type="submit">Add Student</button>
-</form>
-<p id="confirmation" style="color:green;"></p>
+    <p id="okMsg" class="small"></p>
+  </div>
 
 <script>
-const form = document.getElementById('addStudentForm');
-form.addEventListener('submit', function(e){
+$(function(){
+  $('#studentForm').on('submit', function(e){
     e.preventDefault();
-    const studentID = document.getElementById('studentID').value.trim();
-    const firstName = document.getElementById('firstName').value.trim();
-    const lastName = document.getElementById('lastName').value.trim();
-    const email = document.getElementById('email').value.trim();
-
+    $('.error').text('');
+    $('#okMsg').text('');
+    const sid = $('#sid').val().trim();
+    const first = $('#first').val().trim();
+    const last = $('#last').val().trim();
+    const email = $('#email').val().trim();
     let valid = true;
-    document.getElementById('idError').textContent = '';
-    document.getElementById('firstNameError').textContent = '';
-    document.getElementById('lastNameError').textContent = '';
-    document.getElementById('emailError').textContent = '';
 
-    if(studentID === '' || !/^\d+$/.test(studentID)){
-        document.getElementById('idError').textContent = "ID must be numbers only";
-        valid = false;
-    }
-    if(firstName === '' || !/^[A-Za-z]+$/.test(firstName)){
-        document.getElementById('firstNameError').textContent = "First name letters only";
-        valid = false;
-    }
-    if(lastName === '' || !/^[A-Za-z]+$/.test(lastName)){
-        document.getElementById('lastNameError').textContent = "Last name letters only";
-        valid = false;
-    }
-    if(email === '' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-        document.getElementById('emailError').textContent = "Invalid email format";
-        valid = false;
-    }
-    if(!valid) return;
+    if(!/^\d+$/.test(sid)){ $('#err-id').text('Student ID must contain only numbers'); valid=false; }
+    if(!/^[A-Za-z]+$/.test(first)){ $('#err-first').text('First name letters only'); valid=false; }
+    if(!/^[A-Za-z]+$/.test(last)){ $('#err-last').text('Last name letters only'); valid=false; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $('#err-email').text('Invalid email format'); valid=false; }
 
-    document.getElementById('confirmation').textContent = "Validation successful!";
-    form.reset();
+    if(valid){
+      $('#okMsg').text('Validation passed — go to Exercise 3 to submit the student to the table.');
+      $('#studentForm')[0].reset();
+    }
+  });
 });
 </script>
-
 </body>
 </html>
+
