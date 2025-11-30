@@ -1,66 +1,46 @@
 <?php
-session_start();
+// admin/dashboard.php
+require_once __DIR__ . '/../includes/auth.php';
+require_role('admin');
+require_once __DIR__ . '/../includes/db_connect.php';
+include __DIR__ . '/../includes/header.php';
 
-// User must be logged in
-if (!isset($_SESSION['user'])) {
-    header('Location: /tp_web/final_project/public/login.php');
-    exit;
-}
-
-// Logged-in admin info
-$user = $_SESSION['user'];
+// Fetch simple stats
+$stats = [];
+$statsQuery = $pdo->query("SELECT 
+    (SELECT COUNT(*) FROM users WHERE role='student') AS students,
+    (SELECT COUNT(*) FROM users WHERE role='professor') AS professors,
+    (SELECT COUNT(*) FROM attendance_sessions) AS sessions");
+$stats = $statsQuery->fetch();
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 30px;
-        }
-        h1 {
-            color: #333;
-        }
-        .box {
-            background: white;
-            padding: 20px;
-            width: 400px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.15);
-            margin-bottom: 20px;
-        }
-        a {
-            display: block;
-            margin-top: 15px;
-            text-decoration: none;
-            font-size: 18px;
-            color: #0066cc;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .logout {
-            color: red;
-            margin-top: 25px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="box">
-    <h1>Welcome, <?php echo htmlspecialchars($user['fullname']); ?>!</h1>
-
-    <p>Your role: <strong><?php echo $user['role']; ?></strong></p>
-
-    <a href="/tp_web/final_project/admin/students.php">📘 Manage Students</a>
-    <a href="/tp_web/final_project/professor/sessions.php">📝 Manage Sessions</a>
-    <a href="/tp_web/final_project/student/courses.php">📚 Student View</a>
-
-    <a class="logout" href="/tp_web/final_project/public/logout.php">🚪 Logout</a>
+<div class="row">
+  <div class="col-md-8">
+    <h3>Admin Dashboard</h3>
+    <p>Welcome, <?= htmlspecialchars(current_user()['fullname']) ?></p>
+    <div class="row">
+      <div class="col-sm-4 mb-3">
+        <div class="card p-3">
+          <h5>Students</h5>
+          <h2><?= (int)$stats['students'] ?></h2>
+        </div>
+      </div>
+      <div class="col-sm-4 mb-3">
+        <div class="card p-3">
+          <h5>Professors</h5>
+          <h2><?= (int)$stats['professors'] ?></h2>
+        </div>
+      </div>
+      <div class="col-sm-4 mb-3">
+        <div class="card p-3">
+          <h5>Sessions</h5>
+          <h2><?= (int)$stats['sessions'] ?></h2>
+        </div>
+      </div>
+    </div>
+    <p><a href="students.php" class="btn btn-outline-primary">Manage Students</a>
+    <a href="import.php" class="btn btn-outline-secondary">Import Students (Excel/CSV)</a></p>
+  </div>
 </div>
 
-</body>
-</html>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
+

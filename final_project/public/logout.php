@@ -1,4 +1,6 @@
 <?php
+// public/logout.php
 require_once __DIR__ . '/../includes/auth.php';
-logout();
-header('Location: /tp_web/final_project/public/login.php');
+logout_user();
+header('Location: ' . BASE_URL . 'public/login.php');
+exit;

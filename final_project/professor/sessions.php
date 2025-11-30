@@ -1,94 +1,105 @@
 <?php
-// final_project/professor/sessions.php
+// professor/sessions.php
 require_once __DIR__ . '/../includes/auth.php';
-require_login();
-require_login();
-if (!in_array($_SESSION['user']['role'], ['admin', 'professor'])) {
-    http_response_code(403);
-    echo "Forbidden - insufficient role.";
-    exit;
-}
+require_role('professor');
+require_once __DIR__ . '/../includes/db_connect.php';
 
-$pdo = getPDO();
-$user = current_user();
+$prof = current_user();
+$messages = [];
 
-// Fetch course_groups where professor_id = current user
-$stmt = $pdo->prepare("SELECT cg.id AS cgid, c.title AS course, g.name AS groupname
-                       FROM course_groups cg
-                       JOIN courses c ON cg.course_id = c.id
-                       JOIN groups_tbl g ON cg.group_id = g.id
-                       WHERE cg.professor_id = ?");
-$stmt->execute([$user['id']]);
-$groups = $stmt->fetchAll();
-
-// Create session for selected course_group
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_group_id'])) {
-    $cgid = (int)$_POST['course_group_id'];
-    $today = date('Y-m-d');
-    // prevent duplicate session for same course_group and date
-    $stmtC = $pdo->prepare("SELECT COUNT(*) FROM attendance_sessions WHERE course_group_id = ? AND date = ?");
-    $stmtC->execute([$cgid, $today]);
-    if ($stmtC->fetchColumn() == 0) {
-        $stmtIns = $pdo->prepare("INSERT INTO attendance_sessions (course_group_id, date, opened_by, status) VALUES (?, ?, ?, 'open')");
-        $stmtIns->execute([$cgid, $today, $user['id']]);
-        $session_id = $pdo->lastInsertId();
-        header("Location: /tp_web/final_project/professor/session.php?session_id={$session_id}");
-        exit;
+// create session
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_session'])) {
+    $course_id = (int)($_POST['course_id'] ?? 0);
+    $group_id = trim($_POST['group_id'] ?? 'all');
+    $date = $_POST['date'] ?? date('Y-m-d');
+    if ($course_id <= 0) {
+        $messages[] = "Course required.";
     } else {
-        $error = "A session for today already exists for that course/group.";
+        $stmt = $pdo->prepare("INSERT INTO attendance_sessions (course_id, group_id, date, opened_by, status) VALUES (:course, :group, :date, :opened_by, 'open')");
+        $stmt->execute([':course' => $course_id, ':group' => $group_id, ':date' => $date, ':opened_by' => $prof['id']]);
+        $messages[] = "Session opened.";
     }
 }
 
-// fetch all sessions by this professor
-$stmt2 = $pdo->prepare("SELECT s.id, s.date, s.status, c.title, g.name
-                       FROM attendance_sessions s
-                       JOIN course_groups cg ON s.course_group_id = cg.id
-                       JOIN courses c ON cg.course_id = c.id
-                       JOIN groups_tbl g ON cg.group_id = g.id
-                       WHERE cg.professor_id = ?
-                       ORDER BY s.date DESC");
-$stmt2->execute([$user['id']]);
-$sessions = $stmt2->fetchAll();
-?>
-<?php include __DIR__ . '/../includes/header.php'; ?>
-<main class="container">
-  <h2>My Course Groups & Sessions</h2>
+// close session
+if (isset($_GET['close'])) {
+    $id = (int)$_GET['close'];
+    $pdo->prepare("UPDATE attendance_sessions SET status='closed' WHERE id=:id")->execute([':id' => $id]);
+    $messages[] = "Session closed.";
+}
 
-  <section class="card">
-    <h3>Create new session</h3>
-    <?php if (!empty($error)) echo "<p class='notice'>".htmlspecialchars($error)."</p>"; ?>
-    <form method="post" class="form-inline">
-      <label>Course group:
-        <select name="course_group_id" required>
-          <option value="">-- choose --</option>
-          <?php foreach ($groups as $g): ?>
-            <option value="<?php echo $g['cgid']; ?>"><?php echo htmlspecialchars($g['course'] . ' — ' . $g['groupname']); ?></option>
+// list sessions
+$sessions = $pdo->query("SELECT s.*, c.title as course_title, u.fullname as opened_by_name FROM attendance_sessions s LEFT JOIN courses c ON s.course_id=c.id LEFT JOIN users u ON s.opened_by=u.id ORDER BY s.date DESC")->fetchAll();
+$courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
+
+include __DIR__ . '/../includes/header.php';
+?>
+<div class="row">
+  <div class="col-md-8">
+    <h3>Your Sessions</h3>
+    <?php foreach ($messages as $m): ?><div class="alert alert-info"><?= htmlspecialchars($m) ?></div><?php endforeach; ?>
+    <table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Course</th>
+      <th>Date</th>
+      <th>Group</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php foreach ($sessions as $s): ?>
+      <tr>
+        <td><?= (int)$s['id'] ?></td>
+        <td><?= htmlspecialchars($s['course_title'] ?? 'Unknown Course') ?></td>
+        <td><?= htmlspecialchars($s['date'] ?? '-') ?></td>
+        <td><?= htmlspecialchars($s['group_id'] ?? '-') ?></td>
+        <td><?= htmlspecialchars($s['status'] ?? '-') ?></td>
+        <td>
+          <a class="btn btn-sm btn-primary"
+             href="<?= BASE_URL ?>professor/session.php?id=<?= (int)$s['id'] ?>">
+             Open
+          </a>
+
+          <?php if (($s['status'] ?? '') === 'open'): ?>
+            <a class="btn btn-sm btn-warning"
+               href="?close=<?= (int)$s['id'] ?>">
+               Close
+            </a>
+          <?php endif; ?>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+  </tbody>
+</table>
+
+  </div>
+
+  <div class="col-md-4">
+    <h5>Create Session</h5>
+    <form method="post">
+      <div class="mb-2">
+        <label class="form-label">Course</label>
+        <select name="course_id" class="form-select">
+          <option value="">Select course</option>
+          <?php foreach ($courses as $c): ?>
+            <option value="<?= (int)$c['id'] ?>"><?= htmlspecialchars($c['title']) ?></option>
           <?php endforeach; ?>
         </select>
-      </label>
-      <button type="submit">Open Session (today)</button>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Group</label>
+        <input name="group_id" value="all" class="form-control">
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control" value="<?= date('Y-m-d') ?>">
+      </div>
+      <button name="create_session" class="btn btn-success">Create</button>
     </form>
-  </section>
+  </div>
+</div>
 
-  <section class="card">
-    <h3>Recent Sessions</h3>
-    <table class="table">
-      <thead><tr><th>#</th><th>Date</th><th>Course</th><th>Group</th><th>Status</th><th>Action</th></tr></thead>
-      <tbody>
-      <?php foreach ($sessions as $s): ?>
-        <tr>
-          <td><?php echo $s['id']; ?></td>
-          <td><?php echo $s['date']; ?></td>
-          <td><?php echo htmlspecialchars($s['title']); ?></td>
-          <td><?php echo htmlspecialchars($s['name']); ?></td>
-          <td><?php echo $s['status']; ?></td>
-          <td>
-            <a class="btn small" href="/tp_web/final_project/professor/session.php?session_id=<?php echo $s['id']; ?>">Open</a>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      </tbody>
-    </table>
-  </section>
-</main>
 <?php include __DIR__ . '/../includes/footer.php'; ?>

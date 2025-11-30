@@ -1,9 +1,11 @@
 <?php
 // includes/config.php
-return [
-  'host' => '127.0.0.1',
-  'port' => '3306',
-  'username' => 'root',
-  'password' => '',
-  'database' => 'tp_web_db',
-];
+// Basic configuration settings
+
+define('DB_HOST', '127.0.0.1');
+define('DB_NAME', 'tp_web_db');
+define('DB_USER', 'root');
+define('DB_PASS', ''); // change if you have a password
+
+// Base URL of your project (used for links). Adjust if needed.
+define('BASE_URL', '/tp_web/final_project/');

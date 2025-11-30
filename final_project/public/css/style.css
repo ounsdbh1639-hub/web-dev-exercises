@@ -1,26 +1,6 @@
-/* final_project/public/css/style.css */
-:root {
-  --primary: #1565c0;
-  --muted: #666;
-  --bg: #f7f9fb;
-  --card: #ffffff;
-  --radius: 8px;
-}
-
-*{box-sizing:border-box}
-body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;background:var(--bg);color:#222}
-.container{max-width:980px;margin:28px auto;padding:0 16px}
-h1,h2,h3{color:#16325c}
-.card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(18,38,63,0.06);margin-bottom:18px}
-.form-inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.form-inline input[type="text"], .form-inline input[type="password"], .form-inline select{padding:8px;border:1px solid #ddd;border-radius:6px}
-.form-inline label{display:flex;gap:8px;align-items:center}
-button{background:var(--primary);color:#fff;padding:9px 14px;border:0;border-radius:6px;cursor:pointer}
-button.small{padding:6px 10px;font-size:14px}
-.table{width:100%;border-collapse:collapse;margin-top:12px}
-.table th,.table td{padding:10px;border-bottom:1px solid #eee;text-align:left}
-.notice{background:#e8f5e9;padding:10px;border:1px solid #c8e6c9;color:#2e7d32;border-radius:6px}
-.error{background:#ffebee;padding:10px;border:1px solid #ffcdd2;color:#c62828;border-radius:6px}
-a.btn{background:#eee;padding:6px 10px;border-radius:6px;color:#333;text-decoration:none}
-a.btn.small{padding:4px 8px;font-size:13px}
-@media (max-width:600px){.form-inline{flex-direction:column;align-items:stretch}.card{padding:12px}}
+/* public/css/style.css - small styling improvements */
+body { background:#f7f9fb; color:#222; }
+.navbar-brand { font-weight:700; }
+.card { border-radius: 8px; }
+.table th, .table td { vertical-align: middle; }
+footer { background:#fff; border-top:1px solid #eee; margin-top:30px; }

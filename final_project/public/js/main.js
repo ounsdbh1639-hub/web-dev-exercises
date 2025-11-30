@@ -1,5 +1,3 @@
-// final_project/public/js/main.js
-document.addEventListener('DOMContentLoaded', function() {
-  // future interactivity here (search, filter, etc.)
-  console.log('Main script loaded');
-});
+// public/js/main.js
+// small helper file for the app
+console.log('Main JS loaded');

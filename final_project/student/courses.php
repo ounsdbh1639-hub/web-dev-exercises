@@ -1,60 +1,48 @@
 <?php
-// final_project/student/courses.php
+// student/courses.php
 require_once __DIR__ . '/../includes/auth.php';
-require_login();
+require_role('student');
+require_once __DIR__ . '/../includes/db_connect.php';
 
-if (!in_array($_SESSION['user']['role'], ['student', 'admin', 'professor'])) {
-    http_response_code(403);
-    echo "Forbidden - insufficient role.";
-    exit;
-}
-
-$pdo = getPDO();
 $user = current_user();
-
-// 1) Find student record linked by matricule = username
-$stmt = $pdo->prepare("
-    SELECT s.id, s.fullname, g.name AS group_name
-    FROM students s
-    JOIN groups_tbl g ON s.group_id = g.id
-    WHERE s.matricule = ?
-");
-$stmt->execute([$user['username']]);
+// find student row
+$stmt = $pdo->prepare("SELECT * FROM students WHERE user_id = :uid LIMIT 1");
+$stmt->execute([':uid' => $user['id']]);
 $student = $stmt->fetch();
 
-if (!$student) {
-    echo "No student record linked to your user account.";
-    exit;
+// Fetch course groups matching student's group_name (best-effort)
+$courses = [];
+if ($student) {
+    $group = $student['group_name'];
+    if ($group !== '') {
+        $stmt = $pdo->prepare("SELECT c.* FROM courses c JOIN course_groups cg ON cg.course_id = c.id WHERE cg.group_id = :g");
+        $stmt->execute([':g' => $group]);
+        $courses = $stmt->fetchAll();
+    }
+    // fallback: show all courses
+    if (empty($courses)) {
+        $courses = $pdo->query("SELECT * FROM courses")->fetchAll();
+    }
 }
 
-// 2) Fetch courses for student's group
-$stmt2 = $pdo->prepare("
-    SELECT c.id, c.code, c.title, cg.id AS course_group_id
-    FROM course_groups cg
-    JOIN courses c ON cg.course_id = c.id
-    JOIN groups_tbl g ON cg.group_id = g.id
-    WHERE g.name = ?
-");
-$stmt2->execute([$student['group_name']]);
-$courses = $stmt2->fetchAll();
+include __DIR__ . '/../includes/header.php';
 ?>
-<?php include __DIR__ . '/../includes/header.php'; ?>
-<main class="container">
-  <h2>Welcome, <?php echo htmlspecialchars($student['fullname']); ?></h2>
-  <p>Your group: <strong><?php echo htmlspecialchars($student['group_name']); ?></strong></p>
-
-  <section class="card">
-    <h3>Enrolled Courses</h3>
-    <?php if (count($courses) === 0) echo "<p>No courses found for your group.</p>"; ?>
-    <ul>
-      <?php foreach ($courses as $c): ?>
-        <li>
-          <?php echo htmlspecialchars($c['code'] . " — " . $c['title']); ?>
-          <a class="btn small" href="/tp_web/final_project/student/attendance.php?cg=<?php echo $c['course_group_id']; ?>">View attendance</a>
-        </li>
-      <?php endforeach; ?>
-    </ul>
-  </section>
-</main>
+<div class="row">
+  <div class="col-md-8">
+    <h3>Your Courses</h3>
+    <table class="table">
+      <thead><tr><th>#</th><th>Course</th><th>Actions</th></tr></thead>
+      <tbody>
+        <?php foreach ($courses as $c): ?>
+          <tr>
+            <td><?= (int)$c['id'] ?></td>
+            <td><?= htmlspecialchars($c['title']) ?></td>
+            <td><a class="btn btn-sm btn-primary" href="<?= BASE_URL ?>student/attendance.php?course_id=<?= (int)$c['id'] ?>">View Attendance</a></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 

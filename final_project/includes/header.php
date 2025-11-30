@@ -1,34 +1,46 @@
 <?php
-// final_project/includes/header.php
-if (session_status() === PHP_SESSION_NONE) session_start();
-$user = $_SESSION['user'] ?? null;
+// includes/header.php
+require_once __DIR__ . '/auth.php';
+$user = current_user();
 ?>
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Attendance System</title>
-  <link rel="stylesheet" href="/tp_web/final_project/public/css/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendance System</title>
+<link href="<?= BASE_URL ?>public/css/style.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<header style="background:#fff;padding:10px 0;border-bottom:1px solid #eee">
-  <div class="container" style="display:flex;justify-content:space-between;align-items:center">
-    <div><a href="/tp_web/final_project/public/index.php" style="text-decoration:none;font-weight:700;color:var(--primary)">Attendance System</a></div>
-    <nav>
-      <?php if ($user): ?>
-        <?php if ($user['role'] === 'admin'): ?>
-          <a href="/tp_web/final_project/admin/students.php">Students</a> |
-          <a href="/tp_web/final_project/admin/import.php">Import</a> |
-          <a href="/tp_web/final_project/admin/dashboard.php">Dashboard</a>
-        <?php elseif ($user['role'] === 'professor'): ?>
-          <a href="/tp_web/final_project/professor/sessions.php">My Sessions</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="<?= BASE_URL ?>public/index.php">AttendanceSys</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navmenu">
+      <ul class="navbar-nav ms-auto">
+        <?php if ($user): ?>
+            <?php if ($user['role'] === 'admin'): ?>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>admin/dashboard.php">Admin</a></li>
+            <?php endif; ?>
+            <?php if ($user['role'] === 'professor'): ?>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>professor/sessions.php">Professor</a></li>
+            <?php endif; ?>
+            <?php if ($user['role'] === 'student'): ?>
+                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>student/courses.php">Student</a></li>
+            <?php endif; ?>
+            <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>public/logout.php">Logout (<?= htmlspecialchars($user['fullname']) ?>)</a></li>
         <?php else: ?>
-          <a href="/tp_web/final_project/student/courses.php">My Courses</a>
+            <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>public/login.php">Login</a></li>
         <?php endif; ?>
-        | <a href="/tp_web/final_project/public/logout.php">Logout</a>
-      <?php else: ?>
-        <a href="/tp_web/final_project/public/login.php">Login</a>
-      <?php endif; ?>
-    </nav>
+      </ul>
+    </div>
   </div>
-</header>
+</nav>
+
+<div class="container">
+

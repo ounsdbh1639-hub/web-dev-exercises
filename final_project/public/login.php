@@ -1,33 +1,49 @@
 <?php
-require_once __DIR__ . '/../includes/db_connect.php';
+// public/login.php
+require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/auth.php';
 
-$message = '';
+$errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    if ($username && $password && login($username, $password)) {
-        // redirect by role
-        $user = current_user();
-        if ($user['role'] === 'admin') header('Location: /tp_web/final_project/admin/dashboard.php');
-        elseif ($user['role'] === 'professor') header('Location: /tp_web/final_project/professor/sessions.php');
-        else header('Location: /tp_web/final_project/student/courses.php');
-        exit;
+    if ($username === '' || $password === '') {
+        $errors[] = "Username and password are required.";
     } else {
-        $message = 'Invalid credentials.';
+        if (login_user($username, $password)) {
+            header('Location: ' . BASE_URL . 'public/index.php');
+            exit;
+        } else {
+            $errors[] = "Invalid credentials.";
+        }
     }
 }
+
+include __DIR__ . '/../includes/header.php';
 ?>
-<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Login</title></head>
-<body>
-  <h2>Login</h2>
-  <?php if ($message) echo "<p style='color:red;'>".htmlspecialchars($message)."</p>"; ?>
-  <form method="post">
-    <label>Username: <input name="username"></label><br>
-    <label>Password: <input type="password" name="password"></label><br>
-    <button type="submit">Login</button>
-  </form>
-</body>
-</html>
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Login</h4>
+        <?php if ($errors): ?>
+            <div class="alert alert-danger">
+                <?= implode('<br>', array_map('htmlspecialchars', $errors)) ?>
+            </div>
+        <?php endif; ?>
+        <form method="post" novalidate>
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input name="username" class="form-control" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input name="password" type="password" class="form-control">
+          </div>
+          <button class="btn btn-primary">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
